@@ -2,17 +2,25 @@
 // =============================================
 // cadastro.php — Registro de novo usuário
 // =============================================
-require_once 'conexao.php';
+ob_start();
 session_start();
+require_once 'conexao.php';
+
+function responderCadastro(array $dados): void {
+    ob_end_clean();
+    header('Content-Type: application/json; charset=utf-8');
+    header('X-Content-Type-Options: nosniff');
+    echo json_encode($dados, JSON_UNESCAPED_UNICODE);
+    exit;
+}
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST' || ($_POST['action'] ?? '') !== 'cadastrar') {
-    echo json_encode(['status' => 'erro', 'mensagem' => 'Requisição inválida.']);
-    exit;
+    responderCadastro(['status' => 'erro', 'mensagem' => 'Requisição inválida.']);
 }
 
 // --- Coleta e sanitiza os dados ---
 $nome     = trim($_POST['nome']     ?? '');
-$cpf      = preg_replace('/\D/', '', $_POST['cpf'] ?? '');
+$cpf      = preg_replace('/\D/', '', $_POST['cpf'] ?? '');  // apenas dígitos
 $email    = trim($_POST['email']    ?? '');
 $telefone = trim($_POST['telefone'] ?? '');
 $senha    = $_POST['senha']          ?? '';
@@ -20,36 +28,32 @@ $tipo     = $_POST['tipo']           ?? 'aluno';
 
 // --- Validações ---
 if (!$nome || !$cpf || !$email || !$senha) {
-    echo json_encode(['status' => 'erro', 'mensagem' => 'Preencha todos os campos obrigatórios.']);
-    exit;
+    responderCadastro(['status' => 'erro', 'mensagem' => 'Preencha todos os campos obrigatórios.']);
 }
 if (strlen($cpf) !== 11 || !preg_match('/^\d{11}$/', $cpf)) {
-    echo json_encode(['status' => 'erro', 'mensagem' => 'CPF inválido.']);
-    exit;
+    responderCadastro(['status' => 'erro', 'mensagem' => 'CPF inválido.']);
 }
 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-    echo json_encode(['status' => 'erro', 'mensagem' => 'E-mail inválido.']);
-    exit;
+    responderCadastro(['status' => 'erro', 'mensagem' => 'E-mail inválido.']);
 }
 if (strlen($senha) < 8) {
-    echo json_encode(['status' => 'erro', 'mensagem' => 'A senha deve ter pelo menos 8 caracteres.']);
-    exit;
+    responderCadastro(['status' => 'erro', 'mensagem' => 'A senha deve ter pelo menos 8 caracteres.']);
 }
 if (!in_array($tipo, ['aluno', 'colaborador'])) {
     $tipo = 'aluno';
 }
 
-// Formata CPF para exibição: 000.000.000-00
+// CORREÇÃO: Formata CPF DEPOIS das validações, para salvar consistentemente
+// no mesmo formato que o auth.php espera ao fazer login por CPF.
 $cpf_fmt = substr($cpf,0,3).'.'.substr($cpf,3,3).'.'.substr($cpf,6,3).'-'.substr($cpf,9,2);
 
 $pdo = conectar();
 
-// Verifica duplicidade de e-mail ou CPF
+// Verifica duplicidade usando o CPF formatado (igual ao que será salvo)
 $check = $pdo->prepare("SELECT id FROM usuarios WHERE email = :email OR cpf = :cpf LIMIT 1");
 $check->execute([':email' => $email, ':cpf' => $cpf_fmt]);
 if ($check->fetch()) {
-    echo json_encode(['status' => 'erro', 'mensagem' => 'E-mail ou CPF já cadastrado.']);
-    exit;
+    responderCadastro(['status' => 'erro', 'mensagem' => 'E-mail ou CPF já cadastrado.']);
 }
 
 // Hash seguro da senha
@@ -69,7 +73,7 @@ $stmt->execute([
     ':tipo'     => $tipo,
 ]);
 
-echo json_encode([
+responderCadastro([
     'status'   => 'ok',
     'mensagem' => 'Conta criada com sucesso!',
 ]);

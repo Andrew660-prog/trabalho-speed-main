@@ -16,22 +16,22 @@ CREATE TABLE IF NOT EXISTS usuarios (
     cpf         VARCHAR(14) UNIQUE NOT NULL,
     email       VARCHAR(150) UNIQUE NOT NULL,
     telefone    VARCHAR(20),
-    senha       VARCHAR(255) NOT NULL,         -- bcrypt hash
+    senha       VARCHAR(255) NOT NULL,
     tipo        ENUM('aluno', 'colaborador', 'admin') DEFAULT 'aluno',
     criado_em   DATETIME DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Tabela de manifestações
 CREATE TABLE IF NOT EXISTS manifestacoes (
-    id          INT AUTO_INCREMENT PRIMARY KEY,
-    protocolo   VARCHAR(20) UNIQUE NOT NULL,
-    usuario_id  INT NULL,                      -- NULL = anônimo
-    tipo        ENUM('Reclamação','Sugestão','Denúncia','Elogio') NOT NULL,
-    assunto     VARCHAR(200) NOT NULL,
-    descricao   TEXT NOT NULL,
-    status      ENUM('Recebido','Em análise','Em andamento','Concluído','Arquivado') DEFAULT 'Recebido',
-    anonimo     TINYINT(1) DEFAULT 0,
-    criado_em   DATETIME DEFAULT CURRENT_TIMESTAMP,
+    id            INT AUTO_INCREMENT PRIMARY KEY,
+    protocolo     VARCHAR(20) UNIQUE NOT NULL,
+    usuario_id    INT NULL,
+    tipo          ENUM('Reclamação','Sugestão','Denúncia','Elogio') NOT NULL,
+    assunto       VARCHAR(200) NOT NULL,
+    descricao     TEXT NOT NULL,
+    status        ENUM('Recebido','Em análise','Em andamento','Concluído','Arquivado') DEFAULT 'Recebido',
+    anonimo       TINYINT(1) DEFAULT 0,
+    criado_em     DATETIME DEFAULT CURRENT_TIMESTAMP,
     atualizado_em DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -46,10 +46,7 @@ CREATE TABLE IF NOT EXISTS respostas (
     FOREIGN KEY (manifestacao_id) REFERENCES manifestacoes(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Usuário de teste
--- Senha: teste123 (hash bcrypt)
-INSERT IGNORE INTO usuarios (nome, cpf, email, senha, tipo) VALUES
-('Aluno Teste', '000.000.000-00', 'aluno@escola.ce.gov.br',
- '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'aluno'),
-('Admin Escola', '111.111.111-11', 'admin@escola.ce.gov.br',
- '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin');
+-- ATENÇÃO: NÃO insira usuários de teste diretamente aqui com senha em texto plano.
+-- Execute o arquivo php/setup_teste.php pelo navegador UMA VEZ após importar este SQL.
+-- Ele criará os usuários de teste com o hash bcrypt correto gerado pelo próprio PHP.
+

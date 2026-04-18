@@ -9,9 +9,10 @@ define('DB_NAME', 'ouvidoria_eeep');
 define('DB_USER', 'root');       // Altere conforme seu servidor
 define('DB_PASS', '');           // Altere conforme seu servidor
 define('DB_CHARSET', 'utf8mb4');
+define('DB_PORT', '3306');
 
 function conectar(): PDO {
-    $dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=" . DB_CHARSET;
+    $dsn = "mysql:host=" . DB_HOST . ";port=" . DB_PORT . ";dbname=" . DB_NAME . ";charset=" . DB_CHARSET;
     $options = [
         PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
@@ -20,12 +21,18 @@ function conectar(): PDO {
     try {
         return new PDO($dsn, DB_USER, DB_PASS, $options);
     } catch (PDOException $e) {
+        // Limpa qualquer output anterior e retorna erro JSON limpo
+        if (ob_get_level()) ob_end_clean();
         http_response_code(500);
-        echo json_encode(['status' => 'erro', 'mensagem' => 'Falha na conexão com o banco de dados.']);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode([
+            'status'   => 'erro',
+            'mensagem' => 'Falha na conexão com o banco de dados.',
+            // Descomente abaixo apenas em desenvolvimento para depurar:
+            // 'detalhe' => $e->getMessage(),
+        ], JSON_UNESCAPED_UNICODE);
         exit;
     }
 }
-
-// Headers padrão para todas as respostas JSON
-header('Content-Type: application/json; charset=utf-8');
-header('X-Content-Type-Options: nosniff');
+// NOTA: Headers Content-Type são definidos individualmente em cada endpoint
+// para evitar conflitos com ob_start/ob_end_clean.

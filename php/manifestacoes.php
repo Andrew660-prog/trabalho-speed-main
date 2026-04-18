@@ -2,8 +2,10 @@
 // =============================================
 // manifestacoes.php — CRUD via PDO
 // =============================================
-require_once 'conexao.php';
+ob_start();
 session_start();
+require_once 'conexao.php';
+ob_clean();
 
 $method = $_SERVER['REQUEST_METHOD'];
 $action = $_POST['action'] ?? $_GET['action'] ?? '';

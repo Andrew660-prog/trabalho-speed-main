@@ -1,6 +1,5 @@
 /**
  * login.js — Ouvidoria EEEP Dom Walfrido Teixeira Vieira
- * Lógica de autenticação via jQuery AJAX
  */
 
 $(function () {
@@ -37,27 +36,41 @@ $(function () {
         $.ajax({
             url: 'php/auth.php',
             method: 'POST',
+            // Não usamos dataType:'json' para evitar que o jQuery rejeite
+            // a resposta se vier qualquer caractere extra antes do JSON
             data: { action: 'login', identificador: user, senha: pass },
-            dataType: 'json',
-            success: function (res) {
+            success: function (raw) {
                 loader(false);
+
+                // Parse manual — mais tolerante que dataType:'json'
+                let res;
+                try {
+                    res = (typeof raw === 'object') ? raw : JSON.parse(raw);
+                } catch (err) {
+                    console.error('Resposta inválida do servidor:', raw);
+                    mostrarErro('Resposta inesperada do servidor. Veja o console (F12).');
+                    return;
+                }
+
                 if (res.status === 'ok') {
-                    // Salva nome na sessionStorage para o dashboard usar
                     sessionStorage.setItem('usuario_nome', res.usuario.nome);
+                    sessionStorage.setItem('usuario_id',   res.usuario.id);
                     window.location.href = 'dashboard.html';
                 } else {
                     mostrarErro(res.mensagem || 'Credenciais inválidas.');
                 }
             },
-            error: function () {
+            error: function (xhr) {
                 loader(false);
-                // Fallback demo (sem backend)
-                if (user && pass) {
-                    sessionStorage.setItem('usuario_nome', 'Aluno Demo');
-                    window.location.href = 'dashboard.html';
-                } else {
-                    mostrarErro('Erro ao conectar. Tente novamente.');
+                console.error('Erro HTTP:', xhr.status, xhr.responseText);
+                let msg = 'Erro ' + xhr.status + ' ao contatar o servidor.';
+                try {
+                    const r = JSON.parse(xhr.responseText);
+                    if (r.mensagem) msg = r.mensagem;
+                } catch (_) {
+                    if (xhr.responseText) msg = xhr.responseText.substring(0, 200);
                 }
+                mostrarErro(msg);
             }
         });
     });
