@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro — Ouvidoria EEEP Dom Walfrido</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <style>
+        /* Card de cadastro um pouco mais largo que o de login */
+        .card-cadastro {
+            background: var(--branco);
+            border: none;
+            border-radius: 20px;
+            box-shadow: var(--sombra-lg);
+            padding: 2.4rem 2.6rem;
+            max-width: 560px;
+            width: 100%;
+            border-top: 5px solid var(--verde);
+        }
+
+        /* Fundo igual ao login */
+        #tela-cadastro {
+            background: linear-gradient(135deg, var(--verde) 0%, var(--azul) 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
+        }
+
+        /* Indicador de força de senha */
+        #forca-barra {
+            height: 5px;
+            border-radius: 99px;
+            transition: all 0.4s ease;
+            background: #e2e8f0;
+        }
+        #forca-barra.fraca   { background: #e74c3c; width: 33%;  }
+        #forca-barra.media   { background: var(--dourado); width: 66%; }
+        #forca-barra.forte   { background: var(--verde); width: 100%; }
+
+        #forca-texto {
+            font-size: .75rem;
+            font-weight: 700;
+            transition: color 0.3s;
+        }
+
+        /* Tipo de usuário */
+        .tipo-selector {
+            display: flex;
+            gap: .75rem;
+        }
+        .tipo-btn {
+            flex: 1;
+            border: 2px solid #e2e8f0;
+            border-radius: var(--radius-sm);
+            padding: .7rem .5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transicao);
+            font-size: .82rem;
+            font-weight: 700;
+            color: var(--texto-suave);
+            background: #fafbfc;
+        }
+        .tipo-btn i {
+            display: block;
+            font-size: 1.3rem;
+            margin-bottom: .3rem;
+            color: #b0bec5;
+            transition: var(--transicao);
+        }
+        .tipo-btn.ativo {
+            border-color: var(--verde);
+            background: var(--verde-claro);
+            color: var(--verde-escuro);
+        }
+        .tipo-btn.ativo i { color: var(--verde); }
+        input[type="radio"].tipo-radio { display: none; }
+    </style>
+</head>
+
+<body>
+
+    <!-- LOADER -->
+    <div id="loader-overlay" class="d-none">
+        <div class="spinner-border text-light" role="status"></div>
+        <p>Criando sua conta...</p>
+    </div>
+
+    <section id="tela-cadastro" class="animate__animated animate__fadeIn">
+        <div class="card-cadastro animate__animated animate__zoomIn">
+
+            <!-- Cabeçalho -->
+            <div class="text-center mb-4">
+                <div class="login-icon" style="background: linear-gradient(135deg, var(--verde), var(--verde-escuro));">
+                    <i class="fas fa-user-plus"></i>
+                </div>
+                <h2 class="login-titulo">Criar Conta</h2>
+                <p class="text-muted small mb-0">EEEP Dom Walfrido Teixeira Vieira</p>
+            </div>
+
+            <!-- Feedback -->
+            <div id="feedback-cadastro" class="d-none mb-3"></div>
+
+            <form id="formCadastro" novalidate>
+
+                <!-- Tipo de usuário -->
+                <div class="mb-4">
+                    <label class="form-label">Você é...</label>
+                    <div class="tipo-selector">
+                        <label class="tipo-btn ativo" id="btn-aluno">
+                            <input class="tipo-radio" type="radio" name="tipo" value="aluno" checked>
+                            <i class="fas fa-user-graduate"></i>
+                            Aluno(a)
+                        </label>
+                        <label class="tipo-btn" id="btn-colaborador">
+                            <input class="tipo-radio" type="radio" name="tipo" value="colaborador">
+                            <i class="fas fa-chalkboard-teacher"></i>
+                            Colaborador
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Nome -->
+                <div class="mb-3">
+                    <label class="form-label">Nome Completo</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-user text-muted"></i></span>
+                        <input type="text" class="form-control" id="cadNome"
+                            placeholder="Seu nome completo" required>
+                    </div>
+                </div>
+
+                <!-- CPF e Telefone -->
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label">CPF</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-id-card text-muted"></i></span>
+                            <input type="text" class="form-control" id="cadCpf"
+                                placeholder="000.000.000-00" maxlength="14" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Telefone <span class="text-muted fw-normal">(opcional)</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-phone text-muted"></i></span>
+                            <input type="text" class="form-control" id="cadTelefone"
+                                placeholder="(88) 99999-9999" maxlength="15">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- E-mail -->
+                <div class="mb-3">
+                    <label class="form-label">E-mail</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-envelope text-muted"></i></span>
+                        <input type="email" class="form-control" id="cadEmail"
+                            placeholder="aluno@escola.ce.gov.br" required>
+                    </div>
+                </div>
+
+                <!-- Senha -->
+                <div class="mb-1">
+                    <label class="form-label">Senha</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-lock text-muted"></i></span>
+                        <input type="password" class="form-control" id="cadSenha"
+                            placeholder="Mínimo 8 caracteres" required>
+                        <button type="button" class="input-group-text bg-white border-start-0"
+                            id="toggleSenha" style="cursor:pointer;">
+                            <i class="fas fa-eye text-muted" id="iconeSenha"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Força da senha -->
+                <div class="mb-3">
+                    <div id="forca-barra" class="mt-2 mb-1"></div>
+                    <span id="forca-texto" class="text-muted">Digite uma senha</span>
+                </div>
+
+                <!-- Confirmar senha -->
+                <div class="mb-4">
+                    <label class="form-label">Confirmar Senha</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-lock text-muted"></i></span>
+                        <input type="password" class="form-control" id="cadConfirma"
+                            placeholder="Repita a senha" required>
+                    </div>
+                    <div id="confirma-erro" class="d-none mt-1" style="font-size:.8rem; color:#e74c3c;">
+                        <i class="fas fa-exclamation-circle me-1"></i>As senhas não coincidem.
+                    </div>
+                </div>
+
+                <!-- Botão principal -->
+                <button type="submit" class="btn-entrar w-100 mb-3">
+                    <i class="fas fa-user-plus me-2"></i>Criar Minha Conta
+                </button>
+
+                <button type="button" class="btn btn-outline-secondary w-100 rounded-pill"
+                    onclick="window.location.href='login.html'">
+                    <i class="fas fa-arrow-left me-2"></i>Voltar para o Login
+                </button>
+
+                <div class="text-center border-top pt-3 mt-3">
+                    <span class="small text-muted">Já possui conta? </span>
+                    <a href="login.html" class="link-verde small">Entrar agora</a>
+                </div>
+
+            </form>
+        </div>
+    </section>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/js/cadastro.js"></script>
+</body>
+</html>
