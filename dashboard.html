@@ -30,11 +30,16 @@
                 <span class="badge-escola">EEEP Dom Walfrido</span>
             </span>
             <div class="d-flex align-items-center gap-3">
-                <span class="text-white-50 small d-none d-md-inline">
+                <!-- Exibido quando logado -->
+                <span class="text-white-50 small d-none d-md-inline" id="nav-usuario-info">
                     <i class="fas fa-user-circle me-1"></i>
                     <span id="usuario-nome-nav">Aluno</span>
                 </span>
-                <button class="btn-sair" onclick="logout()">
+                <!-- Exibido no modo anônimo -->
+                <span class="text-white-50 small d-none" id="nav-anonimo-info">
+                    <i class="fas fa-user-secret me-1"></i> Modo Anônimo
+                </span>
+                <button class="btn-sair" onclick="sair()">
                     <i class="fas fa-sign-out-alt me-1"></i>Sair
                 </button>
             </div>
@@ -50,35 +55,42 @@
                 <div class="pt-2">
                     <p class="sidebar-label">Menu</p>
                     <ul class="nav flex-column">
-                        <li class="nav-item">
-                            <a class="nav-link active" id="nav-dash" href="#" onclick="showDashboard(); return false;">
-                                <i class="fas fa-home"></i> Dashboard
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" id="nav-nova" href="#" onclick="showFormManifestacao(); return false;">
+                        <li class="nav-item" id="sidebar-nova">
+                            <a class="nav-link active" id="nav-nova" href="#" onclick="showFormManifestacao(); return false;">
                                 <i class="fas fa-plus-circle"></i> Nova Manifestação
                             </a>
                         </li>
-                        <li class="nav-item">
+                        <li class="nav-item somente-logado" id="sidebar-dash">
+                            <a class="nav-link" id="nav-dash" href="#" onclick="showDashboard(); return false;">
+                                <i class="fas fa-home"></i> Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item somente-logado" id="sidebar-minhas">
                             <a class="nav-link" id="nav-minhas" href="#" onclick="showMinhasManifestacoes(); return false;">
                                 <i class="fas fa-list-ul"></i> Minhas Manifestações
                             </a>
                         </li>
-                        <li class="nav-item">
+                        <li class="nav-item somente-logado" id="sidebar-busca">
                             <a class="nav-link" id="nav-busca" href="#" onclick="showAcompanhar(); return false;">
                                 <i class="fas fa-search"></i> Consultar Protocolo
                             </a>
                         </li>
                     </ul>
-                    <p class="sidebar-label">Conta</p>
-                    <ul class="nav flex-column">
+                    <p class="sidebar-label somente-logado">Conta</p>
+                    <ul class="nav flex-column somente-logado">
                         <li class="nav-item">
                             <a class="nav-link" id="nav-perfil" href="#" onclick="showPerfil(); return false;">
                                 <i class="fas fa-user-circle"></i> Meu Perfil
                             </a>
                         </li>
                     </ul>
+
+                    <!-- Aviso exclusivo do modo anônimo -->
+                    <div id="aviso-anonimo" class="d-none mx-3 mt-3 p-3 rounded" style="background:var(--dourado-claro); border:1.5px solid var(--dourado); font-size:.8rem; color:#7a5000;">
+                        <i class="fas fa-user-secret me-2"></i>
+                        <strong>Modo Anônimo</strong><br>
+                        <span class="mt-1 d-block">Você pode enviar uma manifestação sem se identificar. Para acessar todas as funcionalidades, <a href="login.html" class="fw-bold" style="color:#7a5000;">faça login</a>.</span>
+                    </div>
                 </div>
             </nav>
 

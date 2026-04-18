@@ -16,18 +16,25 @@ $(function () {
     /* ================================================
        INICIALIZAÇÃO
        ================================================ */
-    // Exibe nome do usuário vindo da sessionStorage (setado no login)
-    const nomeUsuario = sessionStorage.getItem('usuario_nome') || 'Aluno(a)';
-    $('#usuario-nome-nav').text(nomeUsuario);
-    $('#perfil-nome-exib').text(nomeUsuario);
+    const params   = new URLSearchParams(window.location.search);
+    const anonimo  = params.get('anonimo') === '1';
 
-    // Verifica se veio da apresentação como anônimo
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('anonimo') === '1') {
+    if (anonimo) {
+        // Modo anônimo: oculta itens restritos, mostra aviso
+        $('.somente-logado').addClass('d-none');
+        $('#aviso-anonimo').removeClass('d-none');
+        $('#nav-anonimo-info').removeClass('d-none');
+        // Abre direto no formulário com anônimo marcado
         trocarSecao('sec-manifestacao', 'nav-nova');
         setTimeout(() => $('#checkAnonimo').prop('checked', true).trigger('change'), 300);
     } else {
+        // Modo logado normal
+        const nomeUsuario = sessionStorage.getItem('usuario_nome') || 'Aluno(a)';
+        $('#usuario-nome-nav').text(nomeUsuario);
+        $('#perfil-nome-exib').text(nomeUsuario);
+        $('#nav-usuario-info').removeClass('d-none');
         carregarDashboard();
+        trocarSecao('sec-dashboard', 'nav-dash');
     }
 
     /* ================================================
@@ -42,9 +49,13 @@ $(function () {
     }
 
     /* ================================================
-       LOGOUT
+       SAIR (logout ou voltar se anônimo)
        ================================================ */
-    window.logout = function () {
+    window.sair = function () {
+        if (anonimo) {
+            window.location.href = 'index.html';
+            return;
+        }
         if (!confirm('Deseja encerrar a sessão?')) return;
         loader(true);
         $.ajax({
@@ -57,6 +68,9 @@ $(function () {
             }
         });
     };
+
+    // Mantém compatibilidade com chamadas antigas
+    window.logout = window.sair;
 
     /* ================================================
        NAVEGAÇÃO INTERNA (SIDEBAR)
