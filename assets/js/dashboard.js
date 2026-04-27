@@ -24,9 +24,23 @@ $(function () {
         $('.somente-logado').addClass('d-none');
         $('#aviso-anonimo').removeClass('d-none');
         $('#nav-anonimo-info').removeClass('d-none');
-        // Abre direto no formulário com anônimo marcado
+        // Abre direto no formulário com anônimo marcado e bloqueado
         trocarSecao('sec-manifestacao', 'nav-nova');
-        setTimeout(() => $('#checkAnonimo').prop('checked', true).trigger('change'), 300);
+        setTimeout(() => {
+            const $check = $('#checkAnonimo');
+            $check.prop('checked', true).trigger('change');
+            // Bloqueia visualmente o checkbox
+            $check.prop('disabled', true);
+            // Adiciona tooltip e ícone de cadeado na label
+            const $label = $('label[for="checkAnonimo"]');
+            $label.append(' <i class="fas fa-lock ms-1" style="font-size:.8rem; color:var(--azul); opacity:.7;" title="Faça login para desativar o modo anônimo"></i>');
+            $label.css('cursor', 'pointer');
+            // Ao clicar na área do switch (label ou wrapper), mostra o modal
+            $('.switch-anonimo').css('cursor', 'pointer').on('click', function () {
+                const modal = new bootstrap.Modal(document.getElementById('modalLoginAnonimo'));
+                modal.show();
+            });
+        }, 300);
     } else {
         // Modo logado normal
         const nomeUsuario = sessionStorage.getItem('usuario_nome') || 'Aluno(a)';
