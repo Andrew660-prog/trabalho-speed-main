@@ -1,390 +1,327 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard — Ouvidoria EEEP Dom Walfrido</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=Fraunces:opsz,wght@9..144,300;9..144,600;9..144,700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — Ouvidoria EEEP Dom Walfrido</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
 
-<!-- LOADER -->
 <div id="loader-overlay" class="d-none">
-    <div class="spinner-border" role="status"></div>
-    <p>Processando...</p>
+  <div class="spinner-border" role="status"></div>
+  <p>Processando...</p>
 </div>
 
 <!-- NAVBAR -->
-<nav class="navbar-eeep">
-    <div class="container-fluid">
-        <span class="navbar-brand-texto">
-            <i class="fas fa-handshake"></i>
-            Ouvidoria Digital
-            <span class="badge-escola">EEEP Dom Walfrido</span>
-        </span>
-        <div class="d-flex align-items-center gap-3">
-            <span class="d-none d-md-flex align-items-center gap-2 d-none" id="nav-usuario-info"
-                style="color:rgba(255,255,255,.55);font-size:.8rem;font-weight:500">
-                <i class="fas fa-circle" style="color:var(--verde);font-size:.45rem"></i>
-                <span id="usuario-nome-nav">Aluno</span>
-            </span>
-            <span class="d-none" id="nav-anonimo-info"
-                style="color:rgba(255,255,255,.55);font-size:.8rem;font-weight:500">
-                <i class="fas fa-user-secret me-1" style="color:var(--dourado)"></i>Modo Anônimo
-            </span>
-            <button class="btn-sair" onclick="sair()">
-                <i class="fas fa-sign-out-alt me-1"></i>Sair
-            </button>
-        </div>
-    </div>
-</nav>
+<header class="dash-navbar">
+  <div class="dash-navbar-brand">
+    <div class="n-icon"><i class="fas fa-bullhorn"></i></div>
+    Ouvidoria Digital
+    <span class="dash-navbar-badge">EEEP Dom Walfrido</span>
+  </div>
+  <div class="dash-navbar-spacer"></div>
+  <div class="dash-navbar-user d-none" id="nav-usuario-info">
+    <span class="dot"></span>
+    <span id="usuario-nome-nav">Aluno</span>
+  </div>
+  <div class="d-none" id="nav-anonimo-info">
+    <i class="fas fa-user-secret"></i>
+    <span>Modo Anônimo</span>
+  </div>
+  <button class="btn-logout" onclick="sair()">
+    <i class="fas fa-sign-out-alt"></i> Sair
+  </button>
+</header>
 
 <!-- LAYOUT -->
-<div class="container-fluid">
-    <div class="row g-0">
+<div class="dash-layout">
 
-        <!-- SIDEBAR -->
-        <nav class="col-md-3 col-lg-2 d-md-block sidebar">
-            <div class="pt-1">
-                <p class="sidebar-label">Menu</p>
-                <ul class="nav flex-column">
-                    <li class="nav-item" id="sidebar-nova">
-                        <a class="nav-link active" id="nav-nova" href="#"
-                            onclick="showFormManifestacao(); return false;">
-                            <i class="fas fa-plus-circle"></i> Nova Manifestação
-                        </a>
-                    </li>
-                    <li class="nav-item somente-logado" id="sidebar-dash">
-                        <a class="nav-link" id="nav-dash" href="#"
-                            onclick="showDashboard(); return false;">
-                            <i class="fas fa-home"></i> Dashboard
-                        </a>
-                    </li>
-                    <li class="nav-item somente-logado" id="sidebar-minhas">
-                        <a class="nav-link" id="nav-minhas" href="#"
-                            onclick="showMinhasManifestacoes(); return false;">
-                            <i class="fas fa-list-ul"></i> Minhas Manifestações
-                        </a>
-                    </li>
-                    <li class="nav-item somente-logado" id="sidebar-busca">
-                        <a class="nav-link" id="nav-busca" href="#"
-                            onclick="showAcompanhar(); return false;">
-                            <i class="fas fa-search"></i> Consultar Protocolo
-                        </a>
-                    </li>
-                </ul>
-
-                <p class="sidebar-label somente-logado">Conta</p>
-                <ul class="nav flex-column somente-logado">
-                    <li class="nav-item">
-                        <a class="nav-link" id="nav-perfil" href="#"
-                            onclick="showPerfil(); return false;">
-                            <i class="fas fa-user-circle"></i> Meu Perfil
-                        </a>
-                    </li>
-                </ul>
-
-                <!-- Aviso anônimo -->
-                <div id="aviso-anonimo" class="d-none">
-                    <i class="fas fa-user-secret me-2" style="color:var(--dourado)"></i>
-                    <strong>Modo Anônimo</strong>
-                    <span class="mt-1 d-block">
-                        Você pode enviar uma manifestação sem se identificar.
-                        Para acessar todas as funcionalidades,
-                        <a href="login.html">faça login</a>.
-                    </span>
-                </div>
-            </div>
-        </nav>
-
-        <!-- CONTEÚDO PRINCIPAL -->
-        <main class="col-md-9 ms-sm-auto col-lg-10 main-content">
-            <div id="content-area" class="fade-in-up">
-
-                <!-- ====== DASHBOARD ====== -->
-                <div id="sec-dashboard">
-                    <div class="section-header">
-                        <h1 class="section-title">
-                            Dashboard
-                            <span>Bem-vindo(a) de volta!</span>
-                        </h1>
-                        <button class="btn-verde" onclick="showFormManifestacao()">
-                            <i class="fas fa-plus me-2"></i>Nova Manifestação
-                        </button>
-                    </div>
-
-                    <div class="row g-3 mb-4">
-                        <div class="col-sm-4">
-                            <div class="stat-card verde">
-                                <i class="fas fa-clock stat-icone"></i>
-                                <p class="stat-label">Em aberto</p>
-                                <p class="stat-valor" id="stat-ativas">—</p>
-                            </div>
-                        </div>
-                        <div class="col-sm-4">
-                            <div class="stat-card azul">
-                                <i class="fas fa-check-double stat-icone"></i>
-                                <p class="stat-label">Concluídas</p>
-                                <p class="stat-valor" id="stat-concluidas">—</p>
-                            </div>
-                        </div>
-                        <div class="col-sm-4">
-                            <div class="stat-card dourado">
-                                <i class="fas fa-folder stat-icone"></i>
-                                <p class="stat-label">Total</p>
-                                <p class="stat-valor" id="stat-total">—</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="card-secao">
-                        <div class="card-header-custom">
-                            <i class="fas fa-history"></i>
-                            Últimas Manifestações
-                        </div>
-                        <div class="table-responsive">
-                            <table class="tabela-custom">
-                                <thead>
-                                    <tr>
-                                        <th>Protocolo</th>
-                                        <th>Tipo</th>
-                                        <th>Assunto</th>
-                                        <th>Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="lista-ultimas">
-                                    <tr><td colspan="4" class="text-center py-4" style="color:var(--texto-muted)">Carregando...</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ====== NOVA MANIFESTAÇÃO ====== -->
-                <div id="sec-manifestacao" class="d-none">
-                    <div class="section-header">
-                        <h1 class="section-title">
-                            Nova Manifestação
-                            <span>Preencha os campos abaixo</span>
-                        </h1>
-                    </div>
-
-                    <div class="card-secao">
-                        <div class="card-body-custom">
-                            <div id="feedback-envio" class="d-none mb-4"></div>
-
-                            <form id="formManifestacao" class="form-manifestacao" novalidate>
-                                <div class="switch-anonimo mb-4">
-                                    <input class="form-check-input" type="checkbox" id="checkAnonimo"
-                                        style="width:1.25em;height:1.25em;flex-shrink:0;cursor:pointer">
-                                    <label for="checkAnonimo">
-                                        <i class="fas fa-user-secret me-2"></i>
-                                        Desejo permanecer <strong>anônimo</strong> nesta manifestação
-                                    </label>
-                                </div>
-
-                                <div id="secao-identificacao" class="row mb-3">
-                                    <div class="col-md-8 mb-3">
-                                        <label class="form-label">Nome Completo</label>
-                                        <input type="text" class="form-control" id="nomeUsuario"
-                                            placeholder="Seu nome completo" required>
-                                    </div>
-                                    <div class="col-md-4 mb-3">
-                                        <label class="form-label">CPF</label>
-                                        <input type="text" class="form-control" id="cpfUsuario"
-                                            placeholder="000.000.000-00" required>
-                                    </div>
-                                </div>
-
-                                <div class="row mb-3">
-                                    <div class="col-md-5 mb-3">
-                                        <label class="form-label">Tipo de Manifestação</label>
-                                        <select class="form-select" id="tipo" required>
-                                            <option value="">Selecione o tipo...</option>
-                                            <option value="Elogio">😊 Elogio</option>
-                                            <option value="Sugestão">💡 Sugestão</option>
-                                            <option value="Reclamação">⚠️ Reclamação</option>
-                                            <option value="Denúncia">🔍 Denúncia</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-7 mb-3">
-                                        <label class="form-label">Assunto</label>
-                                        <input type="text" class="form-control" id="assunto"
-                                            placeholder="Ex.: Condições do laboratório de informática" required>
-                                    </div>
-                                </div>
-
-                                <div class="mb-4">
-                                    <label class="form-label">Descrição Detalhada</label>
-                                    <textarea class="form-control" id="descricao" rows="5"
-                                        placeholder="Descreva com detalhes sua manifestação..."
-                                        required></textarea>
-                                </div>
-
-                                <div class="d-flex gap-2 flex-wrap">
-                                    <button type="submit" class="btn-verde">
-                                        <i class="fas fa-paper-plane me-2"></i>Enviar Manifestação
-                                    </button>
-                                    <button type="button" class="btn-verde-outline"
-                                        onclick="showDashboard()">Cancelar</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ====== MINHAS MANIFESTAÇÕES ====== -->
-                <div id="sec-manifestacoes" class="d-none">
-                    <div class="section-header">
-                        <h1 class="section-title">
-                            Minhas Manifestações
-                            <span>Histórico completo</span>
-                        </h1>
-                    </div>
-                    <div class="card-secao">
-                        <div class="table-responsive">
-                            <table class="tabela-custom">
-                                <thead>
-                                    <tr>
-                                        <th>Protocolo</th>
-                                        <th>Data</th>
-                                        <th>Tipo</th>
-                                        <th>Assunto</th>
-                                        <th>Status</th>
-                                        <th>Ações</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tabela-completa">
-                                    <tr><td colspan="6" class="text-center py-4" style="color:var(--texto-muted)">Carregando...</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ====== CONSULTAR PROTOCOLO ====== -->
-                <div id="sec-acompanhar" class="d-none">
-                    <div class="section-header">
-                        <h1 class="section-title">
-                            Consultar Protocolo
-                            <span>Acompanhe o status da sua manifestação</span>
-                        </h1>
-                    </div>
-                    <div class="card-protocolo">
-                        <div class="card-secao">
-                            <div class="card-body-custom">
-                                <p style="color:var(--texto-muted);font-size:.88rem;margin-bottom:1rem">
-                                    <i class="fas fa-info-circle me-2"></i>
-                                    Informe o número do protocolo recebido após o envio.
-                                </p>
-                                <div class="input-group mb-1">
-                                    <span class="input-group-text"><i class="fas fa-hashtag"></i></span>
-                                    <input type="text" id="inputProtocolo" class="form-control"
-                                        placeholder="Ex.: 2026123456" style="font-size:.95rem">
-                                    <button class="btn-azul rounded-end" onclick="buscarProtocolo()">
-                                        <i class="fas fa-search me-2"></i>Buscar
-                                    </button>
-                                </div>
-                                <div id="resultado-protocolo" class="mt-4 d-none"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ====== PERFIL ====== -->
-                <div id="sec-perfil" class="d-none">
-                    <div class="section-header">
-                        <h1 class="section-title">
-                            Meu Perfil
-                            <span>Gerencie suas informações</span>
-                        </h1>
-                    </div>
-                    <div class="card-secao" style="max-width:700px">
-                        <div class="card-body-custom">
-                            <div class="row g-4 align-items-start">
-                                <div class="col-md-4 text-center" style="border-right:1px solid var(--borda)">
-                                    <div class="avatar-perfil">
-                                        <i class="fas fa-user-graduate"></i>
-                                    </div>
-                                    <h5 style="font-weight:700;margin-bottom:.3rem;color:var(--azul)" id="perfil-nome-exib">Aluno(a)</h5>
-                                    <span style="font-size:.75rem;background:var(--verde-claro);color:var(--verde-escuro);padding:.25rem .7rem;border-radius:99px;font-weight:600">Estudante Ativo</span>
-                                </div>
-                                <div class="col-md-8">
-                                    <div id="feedback-perfil" class="alerta-sucesso mb-3 d-none">
-                                        <i class="fas fa-check-circle me-2"></i>Perfil atualizado com sucesso!
-                                    </div>
-                                    <form id="formPerfil">
-                                        <div class="mb-3">
-                                            <label class="form-label">Nome Completo</label>
-                                            <input type="text" class="form-control"
-                                                value="Aluno da Silva Exemplo" readonly
-                                                style="background:var(--fundo);color:var(--texto-suave)">
-                                        </div>
-                                        <div class="row g-3">
-                                            <div class="col-md-6">
-                                                <label class="form-label">E-mail</label>
-                                                <input type="email" class="form-control"
-                                                    value="aluno@escola.ce.gov.br">
-                                            </div>
-                                            <div class="col-md-6">
-                                                <label class="form-label">Telefone</label>
-                                                <input type="text" class="form-control"
-                                                    value="(88) 99999-9999">
-                                            </div>
-                                        </div>
-                                        <div class="mt-4">
-                                            <button type="submit" class="btn-verde">
-                                                <i class="fas fa-save me-2"></i>Salvar Alterações
-                                            </button>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-            </div><!-- /#content-area -->
-        </main>
-
+  <!-- SIDEBAR -->
+  <nav class="dash-sidebar">
+    <p class="sidebar-section-label">Menu</p>
+    <a class="sidebar-link active" id="nav-nova" href="#" onclick="showFormManifestacao(); return false;">
+      <i class="fas fa-plus-circle"></i> Nova Manifestação
+    </a>
+    <a class="sidebar-link somente-logado" id="nav-dash" href="#" onclick="showDashboard(); return false;">
+      <i class="fas fa-house"></i> Dashboard
+    </a>
+    <a class="sidebar-link somente-logado" id="nav-minhas" href="#" onclick="showMinhasManifestacoes(); return false;">
+      <i class="fas fa-list-ul"></i> Minhas Manifestações
+    </a>
+    <a class="sidebar-link somente-logado" id="nav-busca" href="#" onclick="showAcompanhar(); return false;">
+      <i class="fas fa-magnifying-glass"></i> Consultar Protocolo
+    </a>
+    <p class="sidebar-section-label somente-logado" style="margin-top:.5rem">Conta</p>
+    <a class="sidebar-link somente-logado" id="nav-perfil" href="#" onclick="showPerfil(); return false;">
+      <i class="fas fa-circle-user"></i> Meu Perfil
+    </a>
+    <div id="aviso-anonimo" class="d-none">
+      <strong><i class="fas fa-user-secret me-1"></i> Modo Anônimo</strong>
+      Você pode enviar sem se identificar. Para acesso completo, <a href="login.html">faça login</a>.
     </div>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="dash-main">
+    <div id="content-area" class="fade-in-up">
+
+      <!-- DASHBOARD -->
+      <div id="sec-dashboard">
+        <div class="section-header">
+          <div>
+            <div class="section-title">Dashboard</div>
+            <div class="section-subtitle">Resumo das suas manifestações</div>
+          </div>
+          <button class="btn-verde" onclick="showFormManifestacao()">
+            <i class="fas fa-plus"></i> Nova
+          </button>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-card verde">
+            <i class="fas fa-clock stat-icone"></i>
+            <p class="stat-label">Em aberto</p>
+            <p class="stat-valor" id="stat-ativas">—</p>
+          </div>
+          <div class="stat-card azul">
+            <i class="fas fa-check-double stat-icone"></i>
+            <p class="stat-label">Concluídas</p>
+            <p class="stat-valor" id="stat-concluidas">—</p>
+          </div>
+          <div class="stat-card dourado">
+            <i class="fas fa-folder-open stat-icone"></i>
+            <p class="stat-label">Total</p>
+            <p class="stat-valor" id="stat-total">—</p>
+          </div>
+        </div>
+        <div class="card-dark">
+          <div class="card-dark-header">
+            <i class="fas fa-clock-rotate-left"></i> Últimas Manifestações
+          </div>
+          <div class="table-responsive">
+            <table class="table-dark-custom">
+              <thead>
+                <tr>
+                  <th>Protocolo</th>
+                  <th>Tipo</th>
+                  <th>Assunto</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="lista-ultimas">
+                <tr><td colspan="4" style="text-align:center;padding:2rem;color:var(--text-3)">Carregando...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- NOVA MANIFESTAÇÃO -->
+      <div id="sec-manifestacao" class="d-none">
+        <div class="section-header">
+          <div>
+            <div class="section-title">Nova Manifestação</div>
+            <div class="section-subtitle">Preencha os campos abaixo</div>
+          </div>
+        </div>
+        <div class="card-dark">
+          <div class="card-dark-body">
+            <div id="feedback-envio" class="d-none" style="margin-bottom:1.2rem"></div>
+            <form id="formManifestacao" novalidate>
+              <!-- Toggle anônimo — usa classe switch-anonimo para compatibilidade com dashboard.js -->
+              <div class="switch-anonimo">
+                <input class="form-check-input" type="checkbox" id="checkAnonimo" style="accent-color:var(--gold);width:1.1em;height:1.1em;flex-shrink:0">
+                <label for="checkAnonimo" style="font-size:.86rem;font-weight:500;color:#fcd34d;cursor:pointer;margin:0">
+                  <i class="fas fa-user-secret me-2" style="color:var(--gold)"></i>
+                  Desejo permanecer <strong>anônimo</strong> nesta manifestação
+                </label>
+              </div>
+              <div id="secao-identificacao">
+                <div class="field-row" style="margin-bottom:1.1rem">
+                  <div class="field" style="margin-bottom:0">
+                    <label class="field-label">Nome Completo</label>
+                    <div class="field-group">
+                      <i class="fas fa-user field-icon"></i>
+                      <input type="text" class="field-input" id="nomeUsuario" placeholder="Seu nome completo" required>
+                    </div>
+                  </div>
+                  <div class="field" style="margin-bottom:0">
+                    <label class="field-label">CPF</label>
+                    <div class="field-group">
+                      <i class="fas fa-id-card field-icon"></i>
+                      <input type="text" class="field-input" id="cpfUsuario" placeholder="000.000.000-00" required>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="field-row" style="margin-bottom:1.1rem">
+                <div class="field" style="margin-bottom:0">
+                  <label class="field-label">Tipo</label>
+                  <select class="field-input" id="tipo" required>
+                    <option value="">Selecione...</option>
+                    <option value="Elogio">😊 Elogio</option>
+                    <option value="Sugestão">💡 Sugestão</option>
+                    <option value="Reclamação">⚠️ Reclamação</option>
+                    <option value="Denúncia">🔍 Denúncia</option>
+                  </select>
+                </div>
+                <div class="field" style="margin-bottom:0">
+                  <label class="field-label">Assunto</label>
+                  <div class="field-group">
+                    <i class="fas fa-tag field-icon"></i>
+                    <input type="text" class="field-input" id="assunto" placeholder="Ex.: Laboratório de informática" required>
+                  </div>
+                </div>
+              </div>
+              <div class="field" style="margin-bottom:1.4rem">
+                <label class="field-label">Descrição</label>
+                <textarea class="field-input" id="descricao" rows="5"
+                  style="resize:vertical;min-height:130px"
+                  placeholder="Descreva com detalhes sua manifestação..." required></textarea>
+              </div>
+              <div style="display:flex;gap:.75rem;flex-wrap:wrap">
+                <button type="submit" class="btn-verde">
+                  <i class="fas fa-paper-plane"></i> Enviar Manifestação
+                </button>
+                <button type="button" class="btn-outline" onclick="showDashboard()">Cancelar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- MINHAS MANIFESTAÇÕES -->
+      <div id="sec-manifestacoes" class="d-none">
+        <div class="section-header">
+          <div>
+            <div class="section-title">Minhas Manifestações</div>
+            <div class="section-subtitle">Histórico completo</div>
+          </div>
+        </div>
+        <div class="card-dark">
+          <div class="table-responsive">
+            <table class="table-dark-custom">
+              <thead>
+                <tr>
+                  <th>Protocolo</th><th>Data</th><th>Tipo</th><th>Assunto</th><th>Status</th><th></th>
+                </tr>
+              </thead>
+              <tbody id="tabela-completa">
+                <tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--text-3)">Carregando...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- CONSULTAR PROTOCOLO -->
+      <div id="sec-acompanhar" class="d-none">
+        <div class="section-header">
+          <div>
+            <div class="section-title">Consultar Protocolo</div>
+            <div class="section-subtitle">Acompanhe o status da sua manifestação</div>
+          </div>
+        </div>
+        <div class="card-dark" style="max-width:560px">
+          <div class="card-dark-body">
+            <p style="color:var(--text-3);font-size:.84rem;margin-bottom:1rem">
+              <i class="fas fa-circle-info me-2" style="color:var(--verde)"></i>
+              Informe o número do protocolo recebido após o envio.
+            </p>
+            <div class="protocolo-search">
+              <div class="field-group" style="flex:1">
+                <i class="fas fa-hashtag field-icon"></i>
+                <input type="text" id="inputProtocolo" class="field-input" placeholder="Ex.: 2026123456">
+              </div>
+              <button class="btn-verde" onclick="buscarProtocolo()" style="white-space:nowrap">
+                <i class="fas fa-magnifying-glass"></i> Buscar
+              </button>
+            </div>
+            <div id="resultado-protocolo" class="d-none"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PERFIL -->
+      <div id="sec-perfil" class="d-none">
+        <div class="section-header">
+          <div>
+            <div class="section-title">Meu Perfil</div>
+            <div class="section-subtitle">Gerencie suas informações</div>
+          </div>
+        </div>
+        <div class="card-dark" style="max-width:640px">
+          <div class="card-dark-body">
+            <div style="display:grid;grid-template-columns:auto 1fr;gap:2rem;align-items:start">
+              <div style="text-align:center">
+                <div class="profile-avatar"><i class="fas fa-user-graduate"></i></div>
+                <div class="profile-name" id="perfil-nome-exib">Aluno(a)</div>
+                <span style="font-size:.7rem;color:var(--verde);background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2);border-radius:99px;padding:.2rem .6rem;margin-top:.4rem;display:inline-block;font-weight:600">
+                  Estudante Ativo
+                </span>
+              </div>
+              <div>
+                <div id="feedback-perfil" class="alerta-sucesso d-none" style="margin-bottom:1rem">
+                  <i class="fas fa-check-circle"></i><span>Perfil atualizado com sucesso!</span>
+                </div>
+                <form id="formPerfil">
+                  <div class="field">
+                    <label class="field-label">Nome Completo</label>
+                    <input type="text" class="field-input" value="Aluno da Silva Exemplo" readonly style="opacity:.45;cursor:not-allowed">
+                  </div>
+                  <div class="field-row" style="margin-bottom:1.1rem">
+                    <div class="field" style="margin-bottom:0">
+                      <label class="field-label">E-mail</label>
+                      <input type="email" class="field-input" value="aluno@escola.ce.gov.br">
+                    </div>
+                    <div class="field" style="margin-bottom:0">
+                      <label class="field-label">Telefone</label>
+                      <input type="text" class="field-input" value="(88) 99999-9999">
+                    </div>
+                  </div>
+                  <button type="submit" class="btn-verde">
+                    <i class="fas fa-floppy-disk"></i> Salvar Alterações
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /#content-area -->
+  </main>
 </div>
 
 <!-- MODAL: Login necessário para remover anonimato -->
-<div class="modal fade" id="modalLoginAnonimo" tabindex="-1" aria-labelledby="modalLoginAnonimoLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header border-0 pb-0"
-                style="background:var(--azul);color:#fff;padding:1.5rem 1.5rem 1rem;border-radius:var(--radius) var(--radius) 0 0">
-                <div class="d-flex align-items-center gap-2">
-                    <i class="fas fa-lock" style="color:var(--verde)"></i>
-                    <h5 class="modal-title mb-0 fw-bold" id="modalLoginAnonimoLabel" style="font-size:1rem">Login necessário</h5>
-                </div>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
-            </div>
-            <div class="modal-body px-4 py-4 text-center">
-                <div style="width:60px;height:60px;background:var(--verde-claro);border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem">
-                    <i class="fas fa-user-secret" style="font-size:1.6rem;color:var(--verde)"></i>
-                </div>
-                <p class="mb-1 fw-bold" style="color:var(--azul);font-size:.95rem">Você está no modo anônimo</p>
-                <p style="color:var(--texto-suave);font-size:.88rem;margin:0;line-height:1.6">
-                    Para enviar uma manifestação identificada, é necessário fazer login com sua conta.
-                </p>
-            </div>
-            <div class="modal-footer border-0 px-4 pb-4 pt-0 d-flex gap-2 justify-content-center">
-                <button type="button" class="btn-verde-outline" data-bs-dismiss="modal">
-                    <i class="fas fa-user-secret me-2"></i>Continuar anônimo
-                </button>
-                <button type="button" class="btn-verde" onclick="window.location.href='login.html'">
-                    <i class="fas fa-sign-in-alt me-2"></i>Fazer login
-                </button>
-            </div>
+<div class="modal fade" id="modalLoginAnonimo" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" style="max-width:400px">
+    <div class="modal-content">
+      <div class="modal-header-dark">
+        <div class="modal-title">
+          <i class="fas fa-lock"></i> Acesso restrito
         </div>
+        <button class="btn-close-dark" data-bs-dismiss="modal">
+          <i class="fas fa-xmark"></i>
+        </button>
+      </div>
+      <div class="modal-body-dark">
+        <div class="modal-icon"><i class="fas fa-user-secret"></i></div>
+        <p style="font-weight:700;color:var(--text);margin-bottom:.5rem;font-size:.95rem">Você está no modo anônimo</p>
+        <p>Para enviar uma manifestação identificada, é necessário fazer login com sua conta.</p>
+      </div>
+      <div class="modal-footer-dark">
+        <button class="btn-outline" data-bs-dismiss="modal">
+          <i class="fas fa-user-secret me-1"></i> Continuar anônimo
+        </button>
+        <button class="btn-verde" onclick="window.location.href='login.html'">
+          <i class="fas fa-sign-in-alt me-1"></i> Fazer login
+        </button>
+      </div>
     </div>
+  </div>
 </div>
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>

@@ -36,7 +36,7 @@ $(function () {
             $label.append(' <i class="fas fa-lock ms-1" style="font-size:.8rem; color:var(--azul); opacity:.7;" title="Faça login para desativar o modo anônimo"></i>');
             $label.css('cursor', 'pointer');
             // Ao clicar na área do switch (label ou wrapper), mostra o modal
-            $('.switch-anonimo').css('cursor', 'pointer').on('click', function () {
+            $('.switch-anonimo').css('cursor','pointer').on('click', function () {
                 const modal = new bootstrap.Modal(document.getElementById('modalLoginAnonimo'));
                 modal.show();
             });
@@ -94,7 +94,7 @@ $(function () {
         setTimeout(() => {
             $('#content-area > div').addClass('d-none');
             $(`#${secId}`).removeClass('d-none');
-            $('.sidebar .nav-link').removeClass('active');
+            $('.sidebar-link').removeClass('active');
             $(`#${navId}`).addClass('active');
             $('#content-area').addClass('fade-in-up').css('opacity', 1);
 

@@ -19,8 +19,8 @@ $(function () {
     /* ================================================
        SELETOR DE TIPO (Aluno / Colaborador)
        ================================================ */
-    $('.tipo-btn').on('click', function () {
-        $('.tipo-btn').removeClass('ativo');
+    $('.type-btn-auth').on('click', function () {
+        $('.type-btn-auth').removeClass('ativo');
         $(this).addClass('ativo');
         $(this).find('input[type="radio"]').prop('checked', true);
     });
@@ -66,7 +66,7 @@ $(function () {
     });
 
     function avaliarSenha(senha) {
-        if (!senha) return { classe: '', texto: 'Digite uma senha', cor: '#b0bec5' };
+        if (!senha) return { classe: '', texto: 'Digite uma senha', cor: 'var(--text-3)' };
 
         let pontos = 0;
         if (senha.length >= 8)             pontos++;
@@ -74,9 +74,9 @@ $(function () {
         if (/[0-9]/.test(senha))           pontos++;
         if (/[^A-Za-z0-9]/.test(senha))   pontos++;
 
-        if (pontos <= 1) return { classe: 'fraca',  texto: 'Senha fraca',  cor: '#e74c3c' };
-        if (pontos <= 2) return { classe: 'media',  texto: 'Senha média',  cor: '#f0b429' };
-        return              { classe: 'forte',  texto: 'Senha forte',  cor: '#008d4c' };
+        if (pontos <= 1) return { classe: 'fraca',  texto: 'Senha fraca',  cor: '#fca5a5' };
+        if (pontos <= 2) return { classe: 'media',  texto: 'Senha média',  cor: '#fcd34d' };
+        return              { classe: 'forte',  texto: 'Senha forte',  cor: 'var(--verde)' };
     }
 
     /* ================================================
@@ -106,7 +106,7 @@ $(function () {
 
         if (senha !== confirma) {
             $('#confirma-erro').removeClass('d-none');
-            $('#cadConfirma').css('border-color', '#e74c3c');
+            $('#cadConfirma').css('border-color', '#fca5a5');
             return false;
         } else {
             $('#confirma-erro').addClass('d-none');
