@@ -36,13 +36,10 @@ $(function () {
         $.ajax({
             url: 'php/auth.php',
             method: 'POST',
-            // Não usamos dataType:'json' para evitar que o jQuery rejeite
-            // a resposta se vier qualquer caractere extra antes do JSON
             data: { action: 'login', identificador: user, senha: pass },
             success: function (raw) {
                 loader(false);
 
-                // Parse manual — mais tolerante que dataType:'json'
                 let res;
                 try {
                     res = (typeof raw === 'object') ? raw : JSON.parse(raw);
@@ -53,8 +50,13 @@ $(function () {
                 }
 
                 if (res.status === 'ok') {
-                    sessionStorage.setItem('usuario_nome', res.usuario.nome);
-                    sessionStorage.setItem('usuario_id',   res.usuario.id);
+                    // Salva todos os dados do usuário no sessionStorage
+                    sessionStorage.setItem('usuario_nome',     res.usuario.nome      || '');
+                    sessionStorage.setItem('usuario_id',       res.usuario.id        || '');
+                    sessionStorage.setItem('usuario_email',    res.usuario.email     || '');
+                    sessionStorage.setItem('usuario_cpf',      res.usuario.cpf       || '');
+                    sessionStorage.setItem('usuario_telefone', res.usuario.telefone  || '');
+                    sessionStorage.setItem('usuario_tipo',     res.usuario.tipo      || '');
                     window.location.href = 'dashboard.html';
                 } else {
                     mostrarErro(res.mensagem || 'Credenciais inválidas.');

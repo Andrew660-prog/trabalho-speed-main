@@ -1,59 +1,66 @@
 /**
  * dashboard.js — Ouvidoria EEEP Dom Walfrido Teixeira Vieira
- * Lógica do painel interno via jQuery AJAX
  */
 
 $(function () {
 
-    /* ================================================
-       ESTADO LOCAL (fallback demo sem backend)
-       ================================================ */
+    /* ─────────────────────────────────────────
+       DADOS DA SESSÃO
+    ───────────────────────────────────────── */
+    const usuario = {
+        nome:     sessionStorage.getItem('usuario_nome')     || '',
+        id:       sessionStorage.getItem('usuario_id')       || '',
+        email:    sessionStorage.getItem('usuario_email')    || '',
+        cpf:      sessionStorage.getItem('usuario_cpf')      || '',
+        telefone: sessionStorage.getItem('usuario_telefone') || '',
+        tipo:     sessionStorage.getItem('usuario_tipo')     || '',
+    };
+
+    /* ─────────────────────────────────────────
+       DEMO FALLBACK
+    ───────────────────────────────────────── */
     let manifestacoesDemo = [
         { protocolo: '2026001', data: '15/03/2026', tipo: 'Elogio',     assunto: 'Refeitório', status: 'Concluído'  },
         { protocolo: '2026002', data: '20/03/2026', tipo: 'Reclamação', assunto: 'Wi-fi',      status: 'Em análise' },
     ];
 
-    /* ================================================
+    /* ─────────────────────────────────────────
        INICIALIZAÇÃO
-       ================================================ */
-    const params   = new URLSearchParams(window.location.search);
-    const anonimo  = params.get('anonimo') === '1';
+    ───────────────────────────────────────── */
+    const params  = new URLSearchParams(window.location.search);
+    const anonimo = params.get('anonimo') === '1';
 
     if (anonimo) {
-        // Modo anônimo: oculta itens restritos, mostra aviso
         $('.somente-logado').addClass('d-none');
         $('#aviso-anonimo').removeClass('d-none');
         $('#nav-anonimo-info').removeClass('d-none');
-        // Abre direto no formulário com anônimo marcado e bloqueado
         trocarSecao('sec-manifestacao', 'nav-nova');
+
         setTimeout(() => {
             const $check = $('#checkAnonimo');
             $check.prop('checked', true).trigger('change');
-            // Bloqueia visualmente o checkbox
             $check.prop('disabled', true);
-            // Adiciona tooltip e ícone de cadeado na label
+
             const $label = $('label[for="checkAnonimo"]');
-            $label.append(' <i class="fas fa-lock ms-1" style="font-size:.8rem; color:var(--azul); opacity:.7;" title="Faça login para desativar o modo anônimo"></i>');
-            $label.css('cursor', 'pointer');
-            // Ao clicar na área do switch (label ou wrapper), mostra o modal
-            $('.switch-anonimo').css('cursor','pointer').on('click', function () {
-                const modal = new bootstrap.Modal(document.getElementById('modalLoginAnonimo'));
-                modal.show();
+            $label.append(' <i class="fas fa-lock ms-1" style="font-size:.75rem;color:var(--gold);opacity:.8" title="Faça login para desativar o modo anônimo"></i>');
+
+            $('.switch-anonimo').css('cursor', 'pointer').on('click', function () {
+                new bootstrap.Modal(document.getElementById('modalLoginAnonimo')).show();
             });
         }, 300);
+
     } else {
-        // Modo logado normal
-        const nomeUsuario = sessionStorage.getItem('usuario_nome') || 'Aluno(a)';
-        $('#usuario-nome-nav').text(nomeUsuario);
-        $('#perfil-nome-exib').text(nomeUsuario);
+        // Modo logado — preenche navbar e inicia dashboard
+        $('#usuario-nome-nav').text(usuario.nome || 'Usuário');
         $('#nav-usuario-info').removeClass('d-none');
+        preencherPerfil();
         carregarDashboard();
         trocarSecao('sec-dashboard', 'nav-dash');
     }
 
-    /* ================================================
+    /* ─────────────────────────────────────────
        LOADER
-       ================================================ */
+    ───────────────────────────────────────── */
     function loader(show) {
         if (show) {
             $('#loader-overlay').removeClass('d-none').hide().fadeIn(180);
@@ -62,14 +69,11 @@ $(function () {
         }
     }
 
-    /* ================================================
-       SAIR (logout ou voltar se anônimo)
-       ================================================ */
+    /* ─────────────────────────────────────────
+       SAIR
+    ───────────────────────────────────────── */
     window.sair = function () {
-        if (anonimo) {
-            window.location.href = 'index.html';
-            return;
-        }
+        if (anonimo) { window.location.href = 'index.html'; return; }
         if (!confirm('Deseja encerrar a sessão?')) return;
         loader(true);
         $.ajax({
@@ -77,18 +81,16 @@ $(function () {
             method: 'POST',
             data: { action: 'logout' },
             complete: function () {
-                sessionStorage.removeItem('usuario_nome');
+                sessionStorage.clear();
                 setTimeout(() => window.location.href = 'index.html', 300);
             }
         });
     };
-
-    // Mantém compatibilidade com chamadas antigas
     window.logout = window.sair;
 
-    /* ================================================
-       NAVEGAÇÃO INTERNA (SIDEBAR)
-       ================================================ */
+    /* ─────────────────────────────────────────
+       NAVEGAÇÃO INTERNA
+    ───────────────────────────────────────── */
     function trocarSecao(secId, navId) {
         $('#content-area').css('opacity', 0);
         setTimeout(() => {
@@ -100,6 +102,7 @@ $(function () {
 
             if (secId === 'sec-dashboard')     carregarDashboard();
             if (secId === 'sec-manifestacoes') carregarTabelaCompleta();
+            if (secId === 'sec-manifestacao')  preencherFormManifestacao();
         }, 200);
     }
 
@@ -109,9 +112,58 @@ $(function () {
     window.showAcompanhar          = () => trocarSecao('sec-acompanhar',    'nav-busca');
     window.showPerfil              = () => trocarSecao('sec-perfil',        'nav-perfil');
 
-    /* ================================================
+    /* ─────────────────────────────────────────
+       PRÉ-PREENCHIMENTO — FORMULÁRIO DE MANIFESTAÇÃO
+       Preenche nome e CPF com os dados da conta logada.
+       Os campos ficam readonly e com aparência de preenchidos.
+    ───────────────────────────────────────── */
+    function preencherFormManifestacao() {
+        if (anonimo || !usuario.nome) return;
+
+        const $nome = $('#nomeUsuario');
+        const $cpf  = $('#cpfUsuario');
+
+        if (usuario.nome) {
+            $nome.val(usuario.nome)
+                 .prop('readonly', true)
+                 .css({ opacity: '.65', cursor: 'not-allowed' })
+                 .attr('title', 'Preenchido automaticamente com os dados da sua conta');
+        }
+        if (usuario.cpf) {
+            $cpf.val(usuario.cpf)
+                .prop('readonly', true)
+                .css({ opacity: '.65', cursor: 'not-allowed' })
+                .attr('title', 'Preenchido automaticamente com os dados da sua conta');
+        }
+    }
+
+    /* ─────────────────────────────────────────
+       PRÉ-PREENCHIMENTO — PERFIL
+    ───────────────────────────────────────── */
+    function preencherPerfil() {
+        if (!usuario.nome) return;
+
+        // Nome exibido no avatar
+        $('#perfil-nome-exib').text(usuario.nome);
+
+        // Tipo exibido como badge
+        const tipoLabel = { aluno: 'Estudante Ativo', colaborador: 'Colaborador' }[usuario.tipo] || 'Usuário';
+        $('#perfil-badge-tipo').text(tipoLabel);
+
+        // Ícone do avatar por tipo
+        const icone = usuario.tipo === 'colaborador' ? 'fa-chalkboard-teacher' : 'fa-user-graduate';
+        $('#perfil-avatar-icon').removeClass('fa-user-graduate fa-chalkboard-teacher').addClass(icone);
+
+        // Campos do formulário de perfil
+        $('#perfil-campo-nome').val(usuario.nome);
+        $('#perfil-campo-email').val(usuario.email);
+        $('#perfil-campo-telefone').val(usuario.telefone);
+        $('#perfil-campo-cpf').val(usuario.cpf);
+    }
+
+    /* ─────────────────────────────────────────
        DASHBOARD — estatísticas e últimas
-       ================================================ */
+    ───────────────────────────────────────── */
     function carregarDashboard() {
         $.ajax({
             url: 'php/manifestacoes.php',
@@ -145,7 +197,7 @@ $(function () {
     function renderUltimas(lista) {
         const tbody = $('#lista-ultimas');
         if (!lista || !lista.length) {
-            tbody.html('<tr><td colspan="4" class="text-center py-4 text-muted">Nenhuma manifestação encontrada.</td></tr>');
+            tbody.html('<tr><td colspan="4" style="text-align:center;padding:2rem;color:var(--text-3)">Nenhuma manifestação encontrada.</td></tr>');
             return;
         }
         tbody.html(lista.slice(0, 5).map(m => `
@@ -158,9 +210,9 @@ $(function () {
         `).join(''));
     }
 
-    /* ================================================
+    /* ─────────────────────────────────────────
        TABELA COMPLETA
-       ================================================ */
+    ───────────────────────────────────────── */
     function carregarTabelaCompleta() {
         $.ajax({
             url: 'php/manifestacoes.php',
@@ -176,13 +228,13 @@ $(function () {
     function renderTabelaCompleta(lista) {
         const tbody = $('#tabela-completa');
         if (!lista || !lista.length) {
-            tbody.html('<tr><td colspan="6" class="text-center py-4 text-muted">Nenhuma manifestação.</td></tr>');
+            tbody.html('<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--text-3)">Nenhuma manifestação.</td></tr>');
             return;
         }
         tbody.html(lista.map(m => `
             <tr class="fade-in-up">
                 <td><span class="protocolo-badge">#${m.protocolo}</span></td>
-                <td class="text-muted" style="font-size:.85rem">${m.data || '—'}</td>
+                <td style="font-size:.82rem;color:var(--text-3)">${m.data || '—'}</td>
                 <td><span class="badge-tipo ${tipoCss(m.tipo)}">${m.tipo}</span></td>
                 <td>${m.assunto || '—'}</td>
                 <td><span class="badge-status ${statusCss(m.status)}">${m.status}</span></td>
@@ -196,16 +248,18 @@ $(function () {
         `).join(''));
     }
 
-    /* ================================================
+    /* ─────────────────────────────────────────
        FORMULÁRIO DE MANIFESTAÇÃO
-       ================================================ */
+    ───────────────────────────────────────── */
     $('#checkAnonimo').on('change', function () {
         if ($(this).is(':checked')) {
-            $('#secao-identificacao').slideUp(280);
+            $('#secao-identificacao').slideUp(250);
             $('#nomeUsuario, #cpfUsuario').removeAttr('required').val('');
         } else {
-            $('#secao-identificacao').slideDown(280);
+            $('#secao-identificacao').slideDown(250);
             $('#nomeUsuario, #cpfUsuario').attr('required', true);
+            // Re-preenche ao desmarcar anônimo
+            preencherFormManifestacao();
         }
     });
 
@@ -241,7 +295,6 @@ $(function () {
             },
             error: function () {
                 loader(false);
-                // Demo offline
                 const proto = '2026' + String(Math.floor(Math.random() * 900000) + 100000).slice(0, 6);
                 adicionarManifestacaoDemo(dados, proto);
                 mostrarFeedbackEnvio(proto);
@@ -252,26 +305,33 @@ $(function () {
     function adicionarManifestacaoDemo(dados, protocolo) {
         manifestacoesDemo.unshift({
             protocolo,
-            data: new Date().toLocaleDateString('pt-BR'),
-            tipo: dados.tipo,
+            data:    new Date().toLocaleDateString('pt-BR'),
+            tipo:    dados.tipo,
             assunto: dados.assunto,
-            status: 'Recebido'
+            status:  'Recebido'
         });
-        $('#formManifestacao')[0].reset();
+        // Reseta apenas tipo, assunto e descrição — mantém nome/CPF preenchidos
+        $('#tipo').val('');
+        $('#assunto').val('');
+        $('#descricao').val('');
+        $('#checkAnonimo').prop('checked', false);
         $('#secao-identificacao').show();
+        preencherFormManifestacao();
     }
 
     function mostrarFeedbackEnvio(protocolo) {
         $('#feedback-envio').html(`
             <div class="alerta-sucesso fade-in-up">
-                <i class="fas fa-check-circle me-2"></i>
-                <strong>Manifestação enviada com sucesso!</strong><br>
-                Guarde seu protocolo: <strong>${protocolo}</strong>
+                <i class="fas fa-check-circle"></i>
+                <div>
+                    <strong>Manifestação enviada com sucesso!</strong><br>
+                    <span style="font-size:.82rem">Guarde seu número de protocolo: <strong style="font-family:'Courier New',monospace;color:var(--verde)">${protocolo}</strong></span>
+                </div>
             </div>
         `).removeClass('d-none');
         setTimeout(() => $('#feedback-envio').fadeOut(400, function () {
             $(this).addClass('d-none').show();
-        }), 6000);
+        }), 7000);
     }
 
     function mostrarAlerta(tipo, msg) {
@@ -279,14 +339,14 @@ $(function () {
         const ico = tipo === 'erro' ? 'exclamation-circle' : 'check-circle';
         $('#feedback-envio').html(`
             <div class="${cls} fade-in-up">
-                <i class="fas fa-${ico} me-2"></i>${msg}
+                <i class="fas fa-${ico}"></i><span>${msg}</span>
             </div>
         `).removeClass('d-none');
     }
 
-    /* ================================================
+    /* ─────────────────────────────────────────
        BUSCA DE PROTOCOLO
-       ================================================ */
+    ───────────────────────────────────────── */
     window.buscarProtocolo = function () {
         const proto = $('#inputProtocolo').val().trim();
         if (!proto) return;
@@ -320,7 +380,7 @@ $(function () {
         $('#resultado-protocolo').html(`
             <div class="resultado-protocolo fade-in-up">
                 <div class="titulo-proto">
-                    <i class="fas fa-check-circle text-success"></i> Protocolo encontrado
+                    <i class="fas fa-check-circle"></i> Protocolo encontrado
                 </div>
                 <div class="info-row"><strong>Protocolo</strong><span class="protocolo-badge">#${m.protocolo}</span></div>
                 <div class="info-row"><strong>Tipo</strong><span class="badge-tipo ${tipoCss(m.tipo)}">${m.tipo}</span></div>
@@ -334,18 +394,28 @@ $(function () {
     function renderNaoEncontrado() {
         $('#resultado-protocolo').html(`
             <div class="alerta-erro fade-in-up">
-                <i class="fas fa-times-circle me-2"></i>
-                Protocolo não encontrado. Verifique o número e tente novamente.
+                <i class="fas fa-circle-xmark"></i>
+                <span>Protocolo não encontrado. Verifique o número e tente novamente.</span>
             </div>
         `).removeClass('d-none');
     }
 
-    /* ================================================
-       PERFIL
-       ================================================ */
+    /* ─────────────────────────────────────────
+       PERFIL — salvar
+    ───────────────────────────────────────── */
     $('#formPerfil').on('submit', function (e) {
         e.preventDefault();
         loader(true);
+
+        const novoEmail    = $('#perfil-campo-email').val().trim();
+        const novoTelefone = $('#perfil-campo-telefone').val().trim();
+
+        // Atualiza sessionStorage com os novos valores
+        sessionStorage.setItem('usuario_email',    novoEmail);
+        sessionStorage.setItem('usuario_telefone', novoTelefone);
+        usuario.email    = novoEmail;
+        usuario.telefone = novoTelefone;
+
         setTimeout(() => {
             loader(false);
             $('#feedback-perfil').removeClass('d-none').addClass('fade-in-up');
@@ -355,13 +425,12 @@ $(function () {
         }, 700);
     });
 
-    /* ================================================
+    /* ─────────────────────────────────────────
        HELPERS
-       ================================================ */
+    ───────────────────────────────────────── */
     function tipoCss(tipo) {
         return { 'Reclamação': 't-reclamacao', 'Sugestão': 't-sugestao', 'Denúncia': 't-denuncia', 'Elogio': 't-elogio' }[tipo] || '';
     }
-
     function statusCss(status) {
         return { 'Recebido': 's-recebido', 'Em análise': 's-analise', 'Em andamento': 's-andamento', 'Concluído': 's-concluido', 'Arquivado': 's-arquivado' }[status] || '';
     }

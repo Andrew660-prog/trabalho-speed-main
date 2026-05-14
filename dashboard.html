@@ -244,7 +244,7 @@
         </div>
       </div>
 
-      <!-- PERFIL -->
+            <!-- PERFIL -->
       <div id="sec-perfil" class="d-none">
         <div class="section-header">
           <div>
@@ -256,10 +256,12 @@
           <div class="card-dark-body">
             <div style="display:grid;grid-template-columns:auto 1fr;gap:2rem;align-items:start">
               <div style="text-align:center">
-                <div class="profile-avatar"><i class="fas fa-user-graduate"></i></div>
-                <div class="profile-name" id="perfil-nome-exib">Aluno(a)</div>
-                <span style="font-size:.7rem;color:var(--verde);background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2);border-radius:99px;padding:.2rem .6rem;margin-top:.4rem;display:inline-block;font-weight:600">
-                  Estudante Ativo
+                <div class="profile-avatar">
+                  <i class="fas fa-user-graduate" id="perfil-avatar-icon"></i>
+                </div>
+                <div class="profile-name" id="perfil-nome-exib">—</div>
+                <span id="perfil-badge-tipo" style="font-size:.7rem;color:var(--verde);background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2);border-radius:99px;padding:.2rem .6rem;margin-top:.4rem;display:inline-block;font-weight:600">
+                  Carregando...
                 </span>
               </div>
               <div>
@@ -268,17 +270,21 @@
                 </div>
                 <form id="formPerfil">
                   <div class="field">
-                    <label class="field-label">Nome Completo</label>
-                    <input type="text" class="field-input" value="Aluno da Silva Exemplo" readonly style="opacity:.45;cursor:not-allowed">
+                    <label class="field-label">Nome Completo <span style="color:var(--text-3);font-weight:400;text-transform:none;letter-spacing:0;font-size:.7rem">(não editável)</span></label>
+                    <input type="text" class="field-input" id="perfil-campo-nome" placeholder="—" readonly style="opacity:.45;cursor:not-allowed">
+                  </div>
+                  <div class="field">
+                    <label class="field-label">CPF <span style="color:var(--text-3);font-weight:400;text-transform:none;letter-spacing:0;font-size:.7rem">(não editável)</span></label>
+                    <input type="text" class="field-input" id="perfil-campo-cpf" placeholder="—" readonly style="opacity:.45;cursor:not-allowed">
                   </div>
                   <div class="field-row" style="margin-bottom:1.1rem">
                     <div class="field" style="margin-bottom:0">
                       <label class="field-label">E-mail</label>
-                      <input type="email" class="field-input" value="aluno@escola.ce.gov.br">
+                      <input type="email" class="field-input" id="perfil-campo-email" placeholder="—">
                     </div>
                     <div class="field" style="margin-bottom:0">
                       <label class="field-label">Telefone</label>
-                      <input type="text" class="field-input" value="(88) 99999-9999">
+                      <input type="text" class="field-input" id="perfil-campo-telefone" placeholder="—">
                     </div>
                   </div>
                   <button type="submit" class="btn-verde">
